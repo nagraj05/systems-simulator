@@ -10,7 +10,6 @@ import {
   useNodesState,
   useEdgesState,
   ReactFlowProvider,
-  Panel,
   useReactFlow,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -18,24 +17,31 @@ import "@xyflow/react/dist/style.css";
 import { Sidebar } from "@/components/features/simulator/sidebar";
 import { SystemNode } from "@/components/features/simulator/system-node";
 import { Button } from "@/components/ui/button";
-import { Play, Save, Trash2, Settings2, ChevronLeft } from "lucide-react";
+import { Save, Trash2, Settings2, ChevronLeft, Play } from "lucide-react";
 import { createSupabaseClient } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@clerk/nextjs";
 import { useSimulationEngine } from "@/hooks/use-simulation-engine";
 import { NodeConfig } from "@/components/features/simulator/node-config";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+import { useTheme } from "next-themes";
 
 const nodeTypes = {
   system: SystemNode,
@@ -44,14 +50,19 @@ const nodeTypes = {
 const getId = () => `node_${Math.random().toString(36).substr(2, 9)}`;
 
 export function SimulatorBoard({ initialData }: { initialData: any }) {
+  const { resolvedTheme } = useTheme();
   const reactFlowWrapper = useRef(null);
-  const [activeSettingsNodeId, setActiveSettingsNodeId] = useState<string | null>(null);
+  const [activeSettingsNodeId, setActiveSettingsNodeId] = useState<
+    string | null
+  >(null);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState((initialData.nodes || []).map((n: any) => ({
-    ...n,
-    data: { ...n.data, onOpenSettings: (id: string) => setActiveSettingsNodeId(id) }
-  })));
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialData.edges || []);
+  const [nodes, setNodes, onNodesChange] = useNodesState(
+    initialData.nodes || [],
+  );
+  const [edges, setEdges, onEdgesChange] = useEdgesState(
+    initialData.edges || [],
+  );
+
   const [isRunning, setIsRunning] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showBackConfirm, setShowBackConfirm] = useState(false);
@@ -60,23 +71,63 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
   const router = useRouter();
   const { getToken } = useAuth();
 
+  const onOpenSettings = useCallback((nodeId: string) => {
+    setActiveSettingsNodeId(nodeId);
+  }, []);
+
+  const deleteNode = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((node) => node.id !== nodeId));
+      setEdges((eds) =>
+        eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId),
+      );
+      toast.error("Component removed from system");
+    },
+    [setNodes, setEdges],
+  );
+
+  // Inject callbacks into nodes
+  useEffect(() => {
+    setNodes((nds) =>
+      nds.map((n) => ({
+        ...n,
+        data: {
+          ...n.data,
+          onOpenSettings,
+          onDelete: deleteNode,
+        },
+      })),
+    );
+  }, [onOpenSettings, deleteNode, setNodes]);
+
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowBackConfirm(true);
     } else {
-      router.push('/dashboard');
+      router.push("/dashboard");
     }
   };
 
   // Track changes to persistent data only
-  const lastSavedData = useRef(JSON.stringify({ nodes: initialData.nodes, edges: initialData.edges }));
-  
+  const lastSavedData = useRef(
+    JSON.stringify({ nodes: initialData.nodes, edges: initialData.edges }),
+  );
+
   useEffect(() => {
-    const currentData = JSON.stringify({ 
-      nodes: nodes.map(n => ({ id: n.id, type: n.type, position: n.position, data: { ...n.data, isRunning: false } })), 
-      edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target })) 
+    const currentData = JSON.stringify({
+      nodes: nodes.map((n) => ({
+        id: n.id,
+        type: n.type,
+        position: n.position,
+        data: { ...n.data, isRunning: false },
+      })),
+      edges: edges.map((e) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+      })),
     });
-    
+
     if (currentData !== lastSavedData.current) {
       setHasUnsavedChanges(true);
     } else {
@@ -87,32 +138,32 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
   // Integrated Simulation Engine
   useSimulationEngine(nodes, edges, isRunning, setNodes);
 
-  const onNodeConfigUpdate = useCallback((nodeId: string, config: any) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === nodeId) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              config,
-            },
-          };
-        }
-        return node;
-      })
-    );
-  }, [setNodes]);
-
-  const onOpenSettings = useCallback((nodeId: string) => {
-    setActiveSettingsNodeId(nodeId);
-  }, []);
+  const onNodeConfigUpdate = useCallback(
+    (nodeId: string, config: any) => {
+      setNodes((nds) =>
+        nds.map((node) => {
+          if (node.id === nodeId) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                config,
+              },
+            };
+          }
+          return node;
+        }),
+      );
+    },
+    [setNodes],
+  );
 
   const activeSettingsNode = nodes.find((n) => n.id === activeSettingsNodeId);
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge({ ...params, animated: isRunning }, eds)),
-    [isRunning, setEdges]
+    (params: Connection) =>
+      setEdges((eds) => addEdge({ ...params, animated: isRunning }, eds)),
+    [isRunning, setEdges],
   );
 
   const { screenToFlowPosition } = useReactFlow();
@@ -141,17 +192,17 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
         id: getId(),
         type: "system",
         position,
-        data: { 
-          label: `${type.replace('_', ' ')}`, 
-          type: type, 
+        data: {
+          label: `${type.replace("_", " ")}`.toUpperCase(),
+          type: type,
           isRunning: false,
-          onOpenSettings 
+          onDelete: (id: string) => deleteNode(id),
         },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [screenToFlowPosition, onOpenSettings, setNodes]
+    [screenToFlowPosition, deleteNode, setNodes],
   );
 
   const handleSave = async () => {
@@ -159,7 +210,7 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
     try {
       const token = await getToken({ template: "supabase" });
       const supabase = createSupabaseClient(token || undefined);
-      
+
       const { error } = await supabase
         .from("simulations")
         .update({
@@ -169,13 +220,22 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
         .eq("id", params.id);
 
       if (error) throw error;
-      
+
       // Update baseline to ignore changes made before this save
-      lastSavedData.current = JSON.stringify({ 
-        nodes: nodes.map(n => ({ id: n.id, type: n.type, position: n.position, data: { ...n.data, isRunning: false } })), 
-        edges: edges.map(e => ({ id: e.id, source: e.source, target: e.target })) 
+      lastSavedData.current = JSON.stringify({
+        nodes: nodes.map((n) => ({
+          id: n.id,
+          type: n.type,
+          position: n.position,
+          data: { ...n.data, isRunning: false },
+        })),
+        edges: edges.map((e) => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+        })),
       });
-      
+
       setSaving(false);
       setHasUnsavedChanges(false);
       toast.success("Simulation saved successfully");
@@ -190,11 +250,19 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
   const toggleSimulation = () => {
     const newState = !isRunning;
     setIsRunning(newState);
-    
+
     // Update all edges and nodes visual state
-    setEdges((eds) => eds.map((e) => ({ ...e, animated: newState, style: { stroke: newState ? "#00FF00" : undefined } })));
-    setNodes((nds) => nds.map((n) => ({ ...n, data: { ...n.data, isRunning: newState } })));
-    
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        animated: newState,
+        style: { stroke: newState ? "#00FF00" : undefined },
+      })),
+    );
+    setNodes((nds) =>
+      nds.map((n) => ({ ...n, data: { ...n.data, isRunning: newState } })),
+    );
+
     if (newState) {
       toast.success("Simulation started! Data is flowing...");
     } else {
@@ -202,15 +270,59 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
     }
   };
 
-  const deleteSelected = useCallback(() => {
-    setNodes((nds) => nds.filter((node) => !node.selected));
-    setEdges((eds) => eds.filter((edge) => !edge.selected));
-  }, [setNodes, setEdges]);
-
   return (
     <div className="flex h-full w-full bg-background overflow-hidden border rounded-xl shadow-2xl">
       <Sidebar />
-      <div className="flex-grow h-full relative" ref={reactFlowWrapper}>
+      <div className="flex-grow flex flex-col h-full bg-muted/5 relative" ref={reactFlowWrapper}>
+        {/* Top Toolbar */}
+        <div className="h-20 border-b bg-background/80 backdrop-blur-md px-6 flex items-center justify-between z-20 shrink-0">
+          <div className="flex items-center gap-4">
+             <Button
+               variant="outline"
+               size="lg"
+               onClick={handleBack}
+               className="gap-3 h-11 px-6 bg-card/[0.05] hover:bg-accent border-border transition-all font-black text-sm uppercase tracking-widest rounded-xl"
+             >
+               <ChevronLeft className="w-5 h-5 text-primary" /> 
+               <span className="text-foreground">Dashboard</span>
+             </Button>
+             <div className="h-11 px-6 bg-card border border-border rounded-xl shadow-sm flex items-center gap-4">
+               <div className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
+               <div className="flex flex-col justify-center">
+                 <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary leading-none mb-1">Active Design</span>
+                 <span className="text-sm font-black text-foreground tracking-tight leading-none uppercase">{initialData.name}</span>
+               </div>
+             </div>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <Button
+              variant="outline"
+              onClick={handleSave}
+              disabled={saving}
+              className="gap-3 h-11 px-6 font-black uppercase tracking-widest border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 rounded-xl"
+            >
+              <Save className="w-5 h-5" />
+              {saving ? "Saving..." : "Save Simulation"}
+            </Button>
+            <Button
+              variant={isRunning ? "destructive" : "default"}
+              onClick={toggleSimulation}
+              className="gap-3 h-11 px-8 font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all duration-300 rounded-xl"
+            >
+              {isRunning ? (
+                <>
+                  <Trash2 className="w-5 h-5 fill-current" /> Stop Simulation
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5 fill-current" /> Start Simulation
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -222,54 +334,15 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          className="bg-muted/5"
+          // colorMode={resolvedTheme as any}
+          className="flex-grow"
         >
-          <Background color="#ccc" variant={"dots" as any} gap={20} />
+          <Background 
+            // color={resolvedTheme === 'dark' ? '#000000ff' : '#ccc'} 
+            variant={"dots" as any} 
+            gap={20} 
+          />
           <Controls />
-          
-          <Panel position="top-right" className="flex gap-4 p-4">
-            <Button variant="outline" size="sm" onClick={deleteSelected} className="gap-2 bg-card">
-              <Trash2 className="w-4 h-4 text-destructive" /> Delete
-            </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={saving} 
-              className="gap-3 h-12 px-8 font-black uppercase tracking-widest shadow-xl"
-            >
-              <Save className="w-5 h-5" /> 
-              {saving ? "Saving..." : "Save Simulation"}
-            </Button>
-            <Button 
-              variant={isRunning ? "destructive" : "secondary"} 
-              onClick={toggleSimulation}
-              className="gap-3 h-12 px-8 font-black uppercase tracking-widest shadow-xl"
-            >
-              {isRunning ? (
-                <><Trash2 className="w-5 h-5" /> Stop</>
-              ) : (
-                <><Play className="w-5 h-5" /> Run</>
-              )}
-            </Button>
-          </Panel>
-
-          <Panel position="top-left" className="flex gap-4 p-4">
-             <Button 
-               variant="outline" 
-               size="lg" 
-               onClick={handleBack}
-               className="gap-3 h-12 px-8 bg-card/[0.05] hover:bg-accent border-border transition-all font-black text-sm uppercase tracking-widest rounded-2xl"
-             >
-               <ChevronLeft className="w-5 h-5 text-primary" /> 
-               <span className="text-foreground">Dashboard</span>
-             </Button>
-             <div className="px-8 py-3 bg-card border border-border rounded-2xl shadow-2xl flex items-center gap-4 backdrop-blur-xl">
-               <div className="w-3 h-3 rounded-full bg-primary animate-pulse shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
-               <div className="flex flex-col">
-                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary leading-none mb-1">Active Design</span>
-                 <span className="text-base font-black text-foreground tracking-tight leading-none uppercase">{initialData.name}</span>
-               </div>
-             </div>
-          </Panel>
         </ReactFlow>
       </div>
 
@@ -283,20 +356,27 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
               Save changes?
             </AlertDialogTitle>
             <AlertDialogDescription className="pt-2 text-sm leading-relaxed">
-              You might have unsaved changes in your system design. Would you like to save before returning to the dashboard?
+              You might have unsaved changes in your system design. Would you
+              like to save before returning to the dashboard?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2 mt-4">
             <AlertDialogCancel asChild>
-              <Button variant="ghost" className="text-muted-foreground hover:text-foreground" onClick={() => router.push('/dashboard')}>
+              <Button
+                variant="ghost"
+                className="text-muted-foreground hover:text-foreground"
+                onClick={() => router.push("/dashboard")}
+              >
                 Discard and Exit
               </Button>
             </AlertDialogCancel>
             <AlertDialogAction asChild>
-              <Button onClick={async () => {
-                await handleSave();
-                router.push('/dashboard');
-              }}>
+              <Button
+                onClick={async () => {
+                  await handleSave();
+                  router.push("/dashboard");
+                }}
+              >
                 Save and Exit
               </Button>
             </AlertDialogAction>
@@ -304,8 +384,8 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
         </AlertDialogContent>
       </AlertDialog>
 
-      <Sheet 
-        open={!!activeSettingsNode} 
+      <Sheet
+        open={!!activeSettingsNode}
         onOpenChange={(open) => {
           if (!open) {
             setActiveSettingsNodeId(null);
@@ -320,19 +400,24 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
             </SheetTitle>
           </SheetHeader>
           {activeSettingsNode && (
-            <NodeConfig 
-              node={activeSettingsNode} 
-              onUpdate={onNodeConfigUpdate} 
+            <NodeConfig
+              node={activeSettingsNode}
+              onUpdate={onNodeConfigUpdate}
             />
           )}
           <div className="mt-8 pt-6 border-t">
-             <Button 
-               variant="outline" 
-               className="w-full gap-2 text-destructive hover:text-destructive"
-               onClick={deleteSelected}
-             >
-               <Trash2 className="w-4 h-4" /> Delete Component
-             </Button>
+            <Button
+              variant="outline"
+              className="w-full gap-2 text-destructive hover:text-destructive"
+              onClick={() => {
+                if (activeSettingsNode) {
+                  deleteNode(activeSettingsNode.id);
+                  setActiveSettingsNodeId(null);
+                }
+              }}
+            >
+              <Trash2 className="w-4 h-4" /> Delete Component
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
@@ -340,7 +425,11 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
   );
 }
 
-export default function SimulatorContainer({ initialData }: { initialData: { nodes: any[], edges: any[], name: string } }) {
+export default function SimulatorContainer({
+  initialData,
+}: {
+  initialData: { nodes: any[]; edges: any[]; name: string };
+}) {
   return (
     <ReactFlowProvider>
       <SimulatorBoard initialData={initialData} />

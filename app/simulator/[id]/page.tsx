@@ -24,9 +24,12 @@ export default async function SimulatorPage({ params }: { params: Promise<{ id: 
   if (simulation.user_id !== user.id) redirect("/dashboard");
 
   return (
-    <div className="h-screen flex flex-col bg-muted/30 overflow-hidden">
+    <div className="h-screen w-screen flex flex-col bg-background overflow-hidden relative">
       <Navbar />
-      <main className="flex-grow pt-20 p-4 overflow-hidden">
+      {/* Spacer to account for fixed navbar */}
+      <div className="h-20 w-full shrink-0" />
+      
+      <main className="flex-grow p-4 overflow-hidden relative">
         <SimulatorContainer initialData={simulation} />
       </main>
     </div>

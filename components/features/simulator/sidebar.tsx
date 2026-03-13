@@ -133,9 +133,6 @@ export function Sidebar() {
                 <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
                   {el.label}
                 </span>
-                <span className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest leading-none mt-1">
-                  System Node
-                </span>
               </div>
             </Card>
           </div>
