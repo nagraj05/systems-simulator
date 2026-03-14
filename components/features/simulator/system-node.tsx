@@ -1,12 +1,42 @@
 "use client";
 
 import { Handle, Position } from "@xyflow/react";
-import { Terminal, Cpu, Database, Cloud, HardDrive, Share2, Layers, Zap, Settings2, Box, Shield, CreditCard, MessageSquare, ArrowRightLeft, Server } from "lucide-react";
+import {
+  Terminal,
+  Cpu,
+  Database,
+  Cloud,
+  HardDrive,
+  Share2,
+  Layers,
+  Zap,
+  Settings2,
+  Box,
+  Shield,
+  CreditCard,
+  MessageSquare,
+  ArrowRightLeft,
+  Server,
+  Globe,
+  Search,
+  Network,
+  BarChart3,
+  Mail,
+  Smartphone,
+  Bell,
+  LineChart,
+  Activity,
+  Clock,
+  RotateCcw,
+  FileText,
+  GitBranch,
+  Trash2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const iconMap = {
   client: Terminal,
-  microservice: Box,
+  microservice: Cpu,
   auth_service: Shield,
   payment_service: CreditCard,
   postgres: Database,
@@ -17,6 +47,27 @@ const iconMap = {
   api_gateway: Share2,
   lb: Layers,
   server: Server,
+  cloud: Cloud,
+  cdn: Globe,
+  dns: Search,
+  firewall: Shield,
+  vpc: Network,
+  container: Box,
+  email_service: Mail,
+  sms_service: Smartphone,
+  notification_service: Bell,
+  search_service: Search,
+  analytics_service: LineChart,
+  s3: HardDrive,
+  elasticsearch: Search,
+  cassandra: Database,
+  clickhouse: BarChart3,
+  worker: Activity,
+  cron: Clock,
+  websocket: RotateCcw,
+  monitoring: Activity,
+  logging: FileText,
+  tracing: GitBranch,
 };
 
 const colorMap = {
@@ -32,6 +83,27 @@ const colorMap = {
   api_gateway: "text-purple-500 bg-purple-500/10 border-purple-500/20",
   lb: "text-rose-500 bg-rose-500/10 border-rose-500/20",
   server: "text-primary bg-primary/10 border-primary/20",
+  cloud: "text-sky-500 bg-sky-500/10 border-sky-500/20",
+  cdn: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  dns: "text-slate-400 bg-slate-400/10 border-slate-400/20",
+  firewall: "text-rose-600 bg-rose-600/10 border-rose-600/20",
+  vpc: "text-indigo-400 bg-indigo-400/10 border-indigo-400/20",
+  container: "text-blue-500 bg-blue-500/10 border-blue-500/20",
+  email_service: "text-amber-500 bg-amber-500/10 border-amber-500/20",
+  sms_service: "text-green-500 bg-green-500/10 border-green-500/20",
+  notification_service: "text-yellow-500 bg-yellow-500/10 border-yellow-500/20",
+  search_service: "text-orange-500 bg-orange-500/10 border-orange-500/20",
+  analytics_service: "text-violet-500 bg-violet-500/10 border-violet-500/20",
+  s3: "text-amber-600 bg-amber-600/10 border-amber-600/20",
+  elasticsearch: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20",
+  cassandra: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+  clickhouse: "text-red-500 bg-red-500/10 border-red-500/20",
+  worker: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+  cron: "text-slate-500 bg-slate-500/10 border-slate-500/20",
+  websocket: "text-teal-500 bg-teal-500/10 border-teal-500/20",
+  monitoring: "text-orange-500 bg-orange-500/10 border-orange-500/20",
+  logging: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+  tracing: "text-purple-400 bg-purple-400/10 border-purple-400/20",
 };
 
 export function SystemNode({ id, data, selected }: any) {
@@ -48,16 +120,28 @@ export function SystemNode({ id, data, selected }: any) {
       data.isRunning ? "ring-2 ring-primary/20" : "",
       isBottleneck ? "border-destructive animate-pulse" : ""
     )}>
-      {/* Settings Trigger */}
-      <button 
-        onClick={(e) => {
-          e.stopPropagation();
-          data.onOpenSettings?.(id);
-        }}
-        className="absolute -top-2 -right-2 p-1 bg-background border rounded-full shadow-sm opacity-0 group-hover/node:opacity-100 transition-opacity hover:border-primary hover:text-primary z-10"
-      >
-        <Settings2 size={12} />
-      </button>
+      <div className="absolute -top-3 -right-2 flex gap-1 opacity-0 group-hover/node:opacity-100 transition-opacity z-10">
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            data.onOpenSettings?.(id);
+          }}
+          className="p-1.5 bg-background border rounded-full shadow-sm hover:border-primary hover:text-primary transition-all active:scale-95"
+          title="Settings"
+        >
+          <Settings2 size={13} />
+        </button>
+        <button 
+          onClick={(e) => {
+            e.stopPropagation();
+            data.onDelete?.(id);
+          }}
+          className="p-1.5 bg-background border rounded-full shadow-sm hover:border-destructive hover:text-destructive transition-all active:scale-95"
+          title="Delete"
+        >
+          <Trash2 size={13} />
+        </button>
+      </div>
 
       {/* Metrics Overlay */}
       {data.isRunning && (

@@ -15,13 +15,28 @@ import {
   MessageSquare,
   ArrowRightLeft,
   Server,
+  Globe,
+  Search,
+  Network,
+  BarChart3,
+  Mail,
+  Smartphone,
+  Bell,
+  LineChart,
+  Activity,
+  Clock,
+  RotateCcw,
+  FileText,
+  GitBranch,
+  StickyNote,
+  Maximize,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const elements = [
   {
     type: "client",
-    label: "Users",
+    label: "End Users",
     icon: Terminal,
     color: "text-blue-500",
     category: "Client",
@@ -41,9 +56,51 @@ const elements = [
     category: "Routing",
   },
   {
+    type: "cloud",
+    label: "Cloud Region",
+    icon: Cloud,
+    color: "text-sky-500",
+    category: "Infrastructure",
+  },
+  {
+    type: "cdn",
+    label: "CDN",
+    icon: Globe,
+    color: "text-blue-400",
+    category: "Infrastructure",
+  },
+  {
+    type: "dns",
+    label: "DNS Resolver",
+    icon: Search,
+    color: "text-slate-400",
+    category: "Infrastructure",
+  },
+  {
+    type: "firewall",
+    label: "Firewall",
+    icon: Shield,
+    color: "text-rose-600",
+    category: "Infrastructure",
+  },
+  {
+    type: "vpc",
+    label: "VPC / Network",
+    icon: Network,
+    color: "text-indigo-400",
+    category: "Infrastructure",
+  },
+  {
+    type: "container",
+    label: "K8s Container",
+    icon: Box,
+    color: "text-blue-500",
+    category: "Infrastructure",
+  },
+  {
     type: "microservice",
     label: "Microservice",
-    icon: Box,
+    icon: Cpu,
     color: "text-primary",
     category: "Services",
   },
@@ -62,11 +119,39 @@ const elements = [
     category: "Services",
   },
   {
-    type: "redis",
-    label: "Redis Cache",
-    icon: Zap,
+    type: "email_service",
+    label: "Email API",
+    icon: Mail,
+    color: "text-amber-500",
+    category: "Services",
+  },
+  {
+    type: "sms_service",
+    label: "SMS Gateway",
+    icon: Smartphone,
+    color: "text-green-500",
+    category: "Services",
+  },
+  {
+    type: "notification_service",
+    label: "Push Notif",
+    icon: Bell,
+    color: "text-yellow-500",
+    category: "Services",
+  },
+  {
+    type: "search_service",
+    label: "Search Engine",
+    icon: Search,
     color: "text-orange-500",
-    category: "Storage",
+    category: "Services",
+  },
+  {
+    type: "analytics_service",
+    label: "Analytics",
+    icon: LineChart,
+    color: "text-violet-500",
+    category: "Services",
   },
   {
     type: "postgres",
@@ -83,6 +168,41 @@ const elements = [
     category: "Storage",
   },
   {
+    type: "redis",
+    label: "Redis Cache",
+    icon: Zap,
+    color: "text-orange-500",
+    category: "Storage",
+  },
+  {
+    type: "s3",
+    label: "S3 / Object Store",
+    icon: HardDrive,
+    color: "text-amber-600",
+    category: "Storage",
+  },
+  {
+    type: "elasticsearch",
+    label: "Elasticsearch",
+    icon: Search,
+    color: "text-cyan-500",
+    category: "Storage",
+  },
+  {
+    type: "cassandra",
+    label: "Cassandra",
+    icon: Database,
+    color: "text-blue-400",
+    category: "Storage",
+  },
+  {
+    type: "clickhouse",
+    label: "Clickhouse",
+    icon: BarChart3,
+    color: "text-red-500",
+    category: "Storage",
+  },
+  {
     type: "rabbitmq",
     label: "RabbitMQ",
     icon: MessageSquare,
@@ -91,10 +211,66 @@ const elements = [
   },
   {
     type: "kafka",
-    label: "Kafka",
+    label: "Kafka Cluster",
     icon: ArrowRightLeft,
     color: "text-slate-400",
     category: "Messaging",
+  },
+  {
+    type: "worker",
+    label: "Background Worker",
+    icon: Activity,
+    color: "text-emerald-400",
+    category: "Async",
+  },
+  {
+    type: "cron",
+    label: "Scheduled Job",
+    icon: Clock,
+    color: "text-slate-500",
+    category: "Async",
+  },
+  {
+    type: "websocket",
+    label: "WebSocket Server",
+    icon: RotateCcw,
+    color: "text-teal-500",
+    category: "Async",
+  },
+  {
+    type: "monitoring",
+    label: "Prometheus",
+    icon: Activity,
+    color: "text-orange-500",
+    category: "Observability",
+  },
+  {
+    type: "logging",
+    label: "Loki / ELK",
+    icon: FileText,
+    color: "text-amber-400",
+    category: "Observability",
+  },
+  {
+    type: "tracing",
+    label: "Jaeger / Tracing",
+    icon: GitBranch,
+    color: "text-purple-400",
+    category: "Observability",
+  },
+  {
+    type: "annotation",
+    label: "Sticky Note",
+    icon: StickyNote,
+    color: "text-yellow-400",
+    category: "Other",
+  },
+  {
+    type: "group",
+    label: "Cluster / Group",
+    icon: Maximize,
+    color: "text-slate-400",
+    category: "Other",
   },
 ];
 
@@ -103,6 +279,8 @@ export function Sidebar() {
     event.dataTransfer.setData("application/reactflow", nodeType);
     event.dataTransfer.effectAllowed = "move";
   };
+
+  const categories = Array.from(new Set(elements.map((el) => el.category)));
 
   return (
     <aside className="w-80 border-r bg-card h-full p-8 overflow-y-auto custom-scrollbar">
@@ -115,26 +293,37 @@ export function Sidebar() {
         </p>
       </div>
 
-      <div className="grid gap-4">
-        {elements.map((el) => (
-          <div
-            key={el.type}
-            className="group cursor-grab active:cursor-grabbing"
-            onDragStart={(event) => onDragStart(event, el.type)}
-            draggable
-          >
-            <Card className="p-4 flex items-center gap-5 hover:border-primary/50 transition-all duration-300 border-border bg-muted/30 hover:bg-muted/50 rounded-2xl group shadow-sm">
-              <div
-                className={`p-3 rounded-xl bg-background border border-border ${el.color} group-hover:border-primary/30 group-hover:shadow-[0_0_15px_rgba(var(--primary),0.1)] transition-all`}
-              >
-                <el.icon size={22} />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-sm font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
-                  {el.label}
-                </span>
-              </div>
-            </Card>
+      <div className="space-y-10">
+        {categories.map((category) => (
+          <div key={category} className="space-y-4">
+            <h4 className="text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground/50 border-b border-border pb-2">
+              {category}
+            </h4>
+            <div className="grid gap-3">
+              {elements
+                .filter((el) => el.category === category)
+                .map((el) => (
+                  <div
+                    key={el.type}
+                    className="group cursor-grab active:cursor-grabbing"
+                    onDragStart={(event) => onDragStart(event, el.type)}
+                    draggable
+                  >
+                    <Card className="p-3.5 flex items-center gap-4 hover:border-primary/50 transition-all duration-300 border-border bg-muted/20 hover:bg-muted/40 rounded-xl group shadow-none hover:shadow-lg hover:shadow-primary/5">
+                      <div
+                        className={`p-2.5 rounded-lg bg-background border border-border ${el.color} group-hover:border-primary/30 transition-all`}
+                      >
+                        <el.icon size={18} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-xs font-black text-foreground group-hover:text-primary transition-colors tracking-tight">
+                          {el.label}
+                        </span>
+                      </div>
+                    </Card>
+                  </div>
+                ))}
+            </div>
           </div>
         ))}
       </div>

@@ -11,6 +11,7 @@ import {
   useEdgesState,
   ReactFlowProvider,
   useReactFlow,
+  MiniMap,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 
@@ -18,6 +19,7 @@ import { Sidebar } from "@/components/features/simulator/sidebar";
 import { SystemNode } from "@/components/features/simulator/system-node";
 import { Button } from "@/components/ui/button";
 import { Save, Trash2, Settings2, ChevronLeft, Play } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { createSupabaseClient } from "@/lib/supabase";
 import { toast } from "sonner";
 import { useParams, useRouter } from "next/navigation";
@@ -43,15 +45,25 @@ import {
 
 import { useTheme } from "next-themes";
 
+import AnnotationNode from "@/components/features/simulator/annotation-node";
+import GroupNode from "@/components/features/simulator/group-node";
+
 const nodeTypes = {
   system: SystemNode,
+  annotation: AnnotationNode,
+  group: GroupNode,
 };
 
 const getId = () => `node_${Math.random().toString(36).substr(2, 9)}`;
 
 export function SimulatorBoard({ initialData }: { initialData: any }) {
   const { resolvedTheme } = useTheme();
-  const reactFlowWrapper = useRef(null);
+  const [mounted, setMounted] = useState(false);
+  const reactFlowWrapper = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [activeSettingsNodeId, setActiveSettingsNodeId] = useState<
     string | null
   >(null);
@@ -188,21 +200,24 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
         y: event.clientY,
       });
 
+      const nodeType = type === "annotation" ? "annotation" : type === "group" ? "group" : "system";
+
       const newNode = {
         id: getId(),
-        type: "system",
+        type: nodeType,
         position,
         data: {
           label: `${type.replace("_", " ")}`.toUpperCase(),
           type: type,
           isRunning: false,
+          onOpenSettings: (id: string) => onOpenSettings(id),
           onDelete: (id: string) => deleteNode(id),
         },
       };
 
       setNodes((nds) => nds.concat(newNode));
     },
-    [screenToFlowPosition, deleteNode, setNodes],
+    [screenToFlowPosition, deleteNode, setNodes, onOpenSettings],
   );
 
   const handleSave = async () => {
@@ -273,7 +288,13 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
   return (
     <div className="flex h-full w-full bg-background overflow-hidden border rounded-xl shadow-2xl">
       <Sidebar />
-      <div className="flex-grow flex flex-col h-full bg-muted/5 relative" ref={reactFlowWrapper}>
+      <div 
+        className={cn(
+          "flex-grow flex flex-col h-full relative",
+          mounted && resolvedTheme === 'dark' ? 'bg-black/20' : 'bg-muted/5'
+        )} 
+        ref={reactFlowWrapper}
+      >
         {/* Top Toolbar */}
         <div className="h-20 border-b bg-background/80 backdrop-blur-md px-6 flex items-center justify-between z-20 shrink-0">
           <div className="flex items-center gap-4">
@@ -334,15 +355,30 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
           fitView
-          // colorMode={resolvedTheme as any}
+          colorMode={mounted && (resolvedTheme === 'dark' || resolvedTheme === 'light') ? resolvedTheme : 'light'}
           className="flex-grow"
         >
           <Background 
-            // color={resolvedTheme === 'dark' ? '#000000ff' : '#ccc'} 
+            color={mounted && resolvedTheme === 'dark' ? '#333' : '#ccc'} 
             variant={"dots" as any} 
             gap={20} 
           />
           <Controls />
+          <MiniMap 
+            zoomable 
+            pannable 
+            nodeStrokeColor={(n) => {
+              if (n.type === 'annotation') return '#eab308';
+              if (n.type === 'group') return '#94a3b8';
+              return '#10b981';
+            }}
+            nodeColor={(n) => {
+              if (n.type === 'annotation') return '#fef9c3';
+              if (n.type === 'group') return '#f1f5f9';
+              return '#ecfdf5';
+            }}
+            className="dark:bg-[#111] border border-border rounded-xl"
+          />
         </ReactFlow>
       </div>
 
