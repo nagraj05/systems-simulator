@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Layout } from "lucide-react";
 import { ModeToggle } from "@/components/shared/mode-toggle";
 
 export function Navbar() {
@@ -13,49 +12,82 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
-    <nav className={cn(
-      "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6",
-      scrolled ? "bg-background/80 backdrop-blur-xl border-b border-white/5 py-3" : "bg-transparent py-5"
-    )}>
-      <div className="container mx-auto max-w-7xl flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-4 transition-transform hover:scale-105 active:scale-95 group">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.3)] group-hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all">
-            <Layout className="w-7 h-7 text-primary-foreground" />
+    <nav
+      className={cn(
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-10",
+        scrolled
+          ? "bg-[#0D0F14]/90 backdrop-blur-xl border-b border-white/[0.06] py-3"
+          : "bg-transparent py-4"
+      )}
+    >
+      <div className="max-w-7xl mx-auto flex items-center justify-between">
+
+        {/* Logo */}
+        <Link
+          href="/"
+          className="flex items-center gap-3 group transition-transform hover:scale-[1.02] active:scale-95"
+        >
+          <div className="w-8 h-8 rounded-lg bg-[#00E5A0] flex items-center justify-center font-mono text-sm text-black font-medium shadow-[0_0_16px_rgba(0,229,160,0.3)] group-hover:shadow-[0_0_24px_rgba(0,229,160,0.45)] transition-shadow">
+            S
           </div>
-          <span className="font-black text-3xl tracking-tighter text-foreground">ScaleInfra</span>
+          <span className="font-display font-extrabold text-lg tracking-[-0.03em] text-white">
+            SCALEINFRA
+          </span>
         </Link>
-        
-        <div className="flex items-center gap-10">
-          <div className="hidden md:flex items-center gap-10">
-            <Link href="#features" className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">Features</Link>
-            <Link href="#pricing" className="text-sm font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
-          </div>
-          
-          <div className="flex items-center gap-6 border-l border-border pl-8 ml-2">
-            <ModeToggle />
-            {!isSignedIn ? (
+
+        {/* Center nav links */}
+        <div className="hidden md:flex items-center gap-8">
+          {[
+            { label: "Features", href: "#features" },
+            { label: "How it works", href: "#how-it-works" },
+            { label: "Pricing", href: "#pricing" },
+          ].map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="font-mono text-[10px] uppercase tracking-[0.15em] text-white/40 hover:text-white/80 transition-colors duration-200"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+
+        {/* Right side */}
+        <div className="flex items-center gap-3">
+          <ModeToggle />
+
+          {!isSignedIn ? (
+            <>
               <SignInButton mode="modal">
-                <Button variant="ghost" className="text-sm font-black uppercase tracking-[0.2em] text-foreground hover:bg-accent h-12 px-6">
+                <button className="font-mono text-[10px] uppercase tracking-[0.12em] text-white/40 hover:text-white/80 transition-colors px-4 py-2 rounded-md border border-white/[0.07] hover:border-white/20 bg-transparent">
                   Sign In
-                </Button>
+                </button>
               </SignInButton>
-            ) : (
-              <div className="flex items-center gap-8">
-                <Link href="/dashboard" className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-80 transition-opacity">Dashboard</Link>
-                <div className="p-1 rounded-full bg-accent border border-border flex items-center justify-center hover:bg-accent/80 transition-colors">
-                   <UserButton />
-                </div>
+              <SignInButton mode="modal">
+                <button className="font-mono text-[10px] uppercase tracking-[0.12em] text-black font-medium px-4 py-2 rounded-md bg-[#00E5A0] hover:bg-[#33EDAF] transition-colors shadow-[0_0_12px_rgba(0,229,160,0.2)] hover:shadow-[0_0_18px_rgba(0,229,160,0.35)]">
+                  Launch App →
+                </button>
+              </SignInButton>
+            </>
+          ) : (
+            <div className="flex items-center gap-6">
+              <Link
+                href="/dashboard"
+                className="font-mono text-[10px] uppercase tracking-[0.12em] text-[#00E5A0] hover:text-[#33EDAF] transition-colors"
+              >
+                Dashboard
+              </Link>
+              <div className="p-[3px] rounded-full border border-white/10 bg-white/5 hover:bg-white/10 transition-colors">
+                <UserButton />
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </nav>
