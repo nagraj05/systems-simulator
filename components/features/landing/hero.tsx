@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowRight, Terminal, Cpu, Database } from "lucide-react";
 import { SignInButton, useAuth } from "@clerk/nextjs";
+import { motion } from "framer-motion";
 
 function AuthButton({ isSignedIn }: { isSignedIn: boolean | undefined }) {
   if (isSignedIn) {
@@ -60,32 +61,71 @@ export function Hero() {
               {/* Grid Overlay */}
               <div className="absolute inset-0 bg-[linear-gradient(to_right,var(--border)_1px,transparent_1px),linear-gradient(to_bottom,var(--border)_1px,transparent_1px)] bg-[size:40px_40px] opacity-10"></div>
               
-              <div className="flex flex-col items-center gap-4 z-10 group/node">
+              <motion.div 
+                className="flex flex-col items-center gap-4 z-10 group/node"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
                 <div className="w-20 h-20 rounded-2xl bg-card border border-border flex items-center justify-center group-hover/node:border-primary/50 group-hover/node:bg-primary/10 transition-all duration-500 shadow-xl">
                   <Terminal className="w-10 h-10 text-primary" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground group-hover/node:text-primary transition-colors">Client_Node</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground group-hover/node:text-primary transition-colors">Client</span>
+              </motion.div>
+
+              <div className="w-32 h-[2px] bg-gradient-to-r from-primary/30 to-transparent relative hidden md:block overflow-hidden">
+                 <motion.div 
+                   className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-transparent via-primary to-transparent opacity-50"
+                   initial={{ x: "-100%" }}
+                   animate={{ x: "100%" }}
+                   transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                 />
+                 <motion.div 
+                   className="absolute top-1/2 left-0 w-2 h-2 bg-primary rounded-full -translate-y-1/2 shadow-[0_0_15px_rgba(var(--primary),1)]"
+                   initial={{ left: "0%", opacity: 0 }}
+                   animate={{ left: "100%", opacity: [0, 1, 1, 0] }}
+                   transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+                 />
               </div>
 
-              <div className="w-32 h-[2px] bg-gradient-to-r from-primary to-transparent relative hidden md:block">
-                 <div className="absolute top-1/2 left-0 w-3 h-3 bg-primary rounded-full -translate-y-1/2 shadow-[0_0_15px_rgba(var(--primary),1)] animate-[move_3s_infinite_linear]"></div>
-              </div>
-
-              <div className="flex flex-col items-center gap-4 z-10 group/node">
+              <motion.div 
+                className="flex flex-col items-center gap-4 z-10 group/node"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: "backOut" }}
+              >
                 <div className="w-24 h-24 rounded-3xl bg-primary border-4 border-background flex items-center justify-center shadow-[0_0_30px_rgba(var(--primary),0.3)] scale-110">
                   <Cpu className="w-12 h-12 text-primary-foreground" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Load_Balancer</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">Load Balancer</span>
+              </motion.div>
+
+              <div className="w-32 h-[2px] bg-gradient-to-l from-green-500/30 to-transparent relative hidden md:block overflow-hidden">
+                 <motion.div 
+                   className="absolute top-0 right-0 w-full h-full bg-gradient-to-l from-transparent via-green-500 to-transparent opacity-50"
+                   initial={{ x: "100%" }}
+                   animate={{ x: "-100%" }}
+                   transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                 />
+                 <motion.div 
+                   className="absolute top-1/2 right-0 w-2 h-2 bg-green-500 rounded-full -translate-y-1/2 shadow-[0_0_15px_rgba(34,197,94,1)]"
+                   initial={{ right: "0%", opacity: 0 }}
+                   animate={{ right: "100%", opacity: [0, 1, 1, 0] }}
+                   transition={{ duration: 1.5, repeat: Infinity, ease: "linear", delay: 0.5 }}
+                 />
               </div>
 
-              <div className="w-32 h-[2px] bg-gradient-to-l from-green-500 to-transparent relative hidden md:block"></div>
-
-              <div className="flex flex-col items-center gap-4 z-10 group/node">
+              <motion.div 
+                className="flex flex-col items-center gap-4 z-10 group/node"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: "easeOut" }}
+              >
                 <div className="w-20 h-20 rounded-2xl bg-card border border-border flex items-center justify-center  group-hover/node:border-green-500/50 group-hover/node:bg-green-500/10 transition-all duration-500 shadow-xl">
                   <Database className="w-10 h-10 text-green-500" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground group-hover/node:text-green-500 transition-colors">Store_DB</span>
-              </div>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-muted-foreground group-hover/node:text-green-500 transition-colors">DB</span>
+              </motion.div>
            </div>
         </div>
       </div>
