@@ -28,7 +28,7 @@ export function Navbar() {
       <div className="container mx-auto max-w-7xl flex items-center justify-between">
         <Link href="/" className="flex items-center gap-4 transition-transform hover:scale-105 active:scale-95 group">
           <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center shadow-[0_0_20px_rgba(var(--primary),0.3)] group-hover:shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all">
-            <Layout className="w-7 h-7 text-primary-foreground" />
+            <Layout className="w-5 h-5 text-primary-foreground" />
           </div>
           <span className="font-black text-3xl tracking-tighter text-foreground">ScaleInfra</span>
         </Link>

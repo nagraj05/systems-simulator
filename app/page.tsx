@@ -32,12 +32,12 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30">
       <Navbar />
-      <main className="flex-grow">
+      <main className="grow">
         <Hero />
         
         {/* Features Section */}
         <section id="how-it-works" className="py-32 bg-muted/30 relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-20"></div>
+          <div className="absolute top-0 left-0 right-0 h-px bg-linear-to-r from-transparent via-border to-transparent opacity-20"></div>
           <div className="container mx-auto px-4">
             <div className="text-center mb-24">
               <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 text-foreground text-balance">The Engineer&apos;s Sandbox</h2>
@@ -127,7 +127,7 @@ export default function Home() {
                     <p className="text-muted-foreground font-medium mt-1">For serious system design.</p>
                   </div>
                   <div className="flex items-baseline gap-2">
-                    <span className="text-6xl font-black text-foreground">$19</span>
+                    <span className="text-6xl font-black text-foreground">$5</span>
                     <span className="text-muted-foreground font-bold tracking-widest text-xs uppercase">/ Billed monthly</span>
                   </div>
                   <ul className="space-y-4 py-8 border-y border-border">
@@ -164,10 +164,10 @@ export default function Home() {
         <div className="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-3 text-foreground font-black text-2xl tracking-tighter">
              <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center font-mono text-xl text-primary-foreground">S</div>
-             SYS-SIM
+             ScaleInfra
           </div>
           <p className="text-sm text-muted-foreground font-bold tracking-wide">
-            &copy; {new Date().getFullYear()} SYS-SIM. Purpose-built for system architects.
+            &copy; {new Date().getFullYear()} ScaleInfra. Purpose-built for system architects.
           </p>
           <div className="flex items-center gap-6">
              <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors text-sm font-bold">Privacy</Link>
