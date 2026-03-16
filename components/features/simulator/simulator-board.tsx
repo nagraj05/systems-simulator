@@ -45,13 +45,18 @@ import {
 
 import { useTheme } from "next-themes";
 
-import AnnotationNode from "@/components/features/simulator/annotation-node";
-import GroupNode from "@/components/features/simulator/group-node";
+import { DeletableEdge } from "@/components/features/simulator/deletable-edge";
+import annotationNode from "./annotation-node";
+import groupNode from "./group-node";
 
 const nodeTypes = {
   system: SystemNode,
-  annotation: AnnotationNode,
-  group: GroupNode,
+  annotation: annotationNode,
+  group: groupNode,
+};
+
+const edgeTypes = {
+  deletable: DeletableEdge,
 };
 
 const getId = () => `node_${Math.random().toString(36).substr(2, 9)}`;
@@ -98,7 +103,15 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
     [setNodes, setEdges],
   );
 
-  // Inject callbacks into nodes
+  const deleteEdge = useCallback(
+    (edgeId: string) => {
+      setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+      toast.error("Connection removed");
+    },
+    [setEdges],
+  );
+
+  // Inject callbacks into nodes and edges
   useEffect(() => {
     setNodes((nds) =>
       nds.map((n) => ({
@@ -110,7 +123,18 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
         },
       })),
     );
-  }, [onOpenSettings, deleteNode, setNodes]);
+
+    setEdges((eds) =>
+      eds.map((e) => ({
+        ...e,
+        type: "deletable",
+        data: {
+          ...e.data,
+          onDelete: deleteEdge,
+        },
+      })),
+    );
+  }, [onOpenSettings, deleteNode, deleteEdge, setNodes, setEdges]);
 
   const handleBack = () => {
     if (hasUnsavedChanges) {
@@ -174,8 +198,18 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
 
   const onConnect = useCallback(
     (params: Connection) =>
-      setEdges((eds) => addEdge({ ...params, animated: isRunning }, eds)),
-    [isRunning, setEdges],
+      setEdges((eds) =>
+        addEdge(
+          {
+            ...params,
+            type: "deletable",
+            animated: isRunning,
+            data: { onDelete: deleteEdge },
+          },
+          eds,
+        ),
+      ),
+    [isRunning, setEdges, deleteEdge],
   );
 
   const { screenToFlowPosition } = useReactFlow();
@@ -354,6 +388,7 @@ export function SimulatorBoard({ initialData }: { initialData: any }) {
           onDrop={onDrop}
           onDragOver={onDragOver}
           nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           fitView
           colorMode={mounted && (resolvedTheme === 'dark' || resolvedTheme === 'light') ? resolvedTheme : 'light'}
           className="flex-grow"
