@@ -36,7 +36,7 @@ export function Hero() {
       <div className="container mx-auto px-4 text-center">
         <div className="inline-flex items-center gap-3 rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold mb-10 animate-in fade-in slide-in-from-bottom-3 duration-1000">
           <span className="bg-primary text-primary-foreground px-2 py-0.5 rounded-full text-[10px]">NEW</span>
-          <span className="text-primary tracking-wide">Interactive Visual Simulator v2.0 is live!</span>
+          <span className="text-primary tracking-wide">Interactive Visual Simulator v1.0 is live!</span>
         </div>
         
         <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-8 leading-[0.9] text-foreground">
@@ -49,9 +49,9 @@ export function Hero() {
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-24">
           <AuthButton isSignedIn={isSignedIn} />
-          <Button variant="outline" size="lg" className="h-14 px-10 text-base font-bold bg-background border-border hover:bg-accent transition-all text-foreground">
+          {/* <Button variant="outline" size="lg" className="h-14 px-10 text-base font-bold bg-background border-border hover:bg-accent transition-all text-foreground">
             <Link href="#how-it-works">Watch Demo</Link>
-          </Button>
+          </Button> */}
         </div>
         
         {/* Premium Visualization Mockup */}
